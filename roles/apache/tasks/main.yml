@@ -1,0 +1,64 @@
+---
+- name: Ensure Apache package is installed
+  ansible.builtin.package:
+    name: "{{ apache_package_name }}"
+    state: present
+  notify: Restart Apache # Notify the handler if installed/updated
+
+- name: Ensure default Listen 80 directive is absent
+  ansible.builtin.lineinfile:
+    path: "{{ apache_listen_config_file }}" # Same variable used before (e.g., /etc/apache2/ports.conf)
+    regexp: '^\s*Listen\s+80\s*$' # Regex to match 'Listen 80' potentially with whitespace
+    state: absent # Ensure the line does not exist
+  notify: Restart Apache # Configuration changed, need to restart
+
+- name: Ensure Apache is configured to listen on the specified port
+  ansible.builtin.lineinfile:
+    path: "{{ apache_listen_config_file }}" # Use the variable defined in vars
+    regexp: '^Listen {{ apache_listen_port }}$' # Match the exact line
+    line: 'Listen {{ apache_listen_port }}'   # Ensure this line exists
+    state: present
+  notify: Restart Apache # Restart apache if this line is added/changed
+
+- name: Create web application root directory
+  ansible.builtin.file:
+    path: "{{ web_root_dir }}"
+    state: directory
+    owner: "{{ web_app_owner }}"
+    group: "{{ web_app_group }}"
+    mode: '0755'
+
+- name: Copy dummy index file
+  ansible.builtin.copy:
+    src: index.html # Looks relative to the role's files/ directory
+    dest: "{{ web_root_dir }}/index.html"
+    owner: "{{ web_app_owner }}"
+    group: "{{ web_app_group }}"
+    mode: '0644'
+
+- name: Configure Apache VirtualHost/Default Site
+  ansible.builtin.template:
+    src: apache-vhost.conf.j2 # Looks relative to the role's templates/ directory
+    dest: "{{ apache_config_path }}" # Destination path from vars
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Apache # Notify the handler if the config changes
+
+# Specific step for Debian/Ubuntu to enable the site
+- name: Enable site configuration (Debian/Ubuntu)
+  ansible.builtin.file:
+    src: "{{ apache_config_path }}"
+    dest: "{{ apache_vhost_dest_path }}"
+    state: link
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_os_family == 'Debian'
+  notify: Restart Apache
+
+- name: Ensure Apache service is enabled and running
+  ansible.builtin.service:
+    name: "{{ apache_service_name }}"
+    state: started
+    enabled: yes

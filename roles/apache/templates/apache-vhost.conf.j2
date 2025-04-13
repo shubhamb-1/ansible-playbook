@@ -1,0 +1,40 @@
+# Managed by Ansible - {{ ansible_managed }}
+
+# For Apache 2.4+ on RHEL/CentOS family (goes in /etc/httpd/conf.d/vhost.conf)
+{% if ansible_os_family != 'Debian' %}
+<VirtualHost *:{{ apache_listen_port }}>
+    ServerAdmin webmaster@localhost
+    DocumentRoot "{{ web_root_dir }}"
+
+    <Directory "{{ web_root_dir }}">
+        Options Indexes FollowSymLinks
+        AllowOverride None
+        Require all granted
+    </Directory>
+
+    ErrorLog /var/log/httpd/error_log
+    CustomLog /var/log/httpd/access_log combined
+</VirtualHost>
+{% endif %}
+
+# For Apache 2.4+ on Debian/Ubuntu family (replaces /etc/apache2/sites-available/000-default.conf)
+{% if ansible_os_family == 'Debian' %}
+<VirtualHost *:{{ apache_listen_port }}>
+    ServerAdmin webmaster@localhost
+    DocumentRoot "{{ web_root_dir }}"
+
+    # --- ADD THIS <Directory> BLOCK ---
+    <Directory "{{ web_root_dir }}">
+        # Optional: Adjust options as needed
+        Options Indexes FollowSymLinks
+        # Common setting for security
+        AllowOverride None
+        # Crucial: Allows access to this directory
+        Require all granted
+    </Directory>
+    # --- END OF ADDED BLOCK ---
+
+    ErrorLog ${APACHE_LOG_DIR}/error.log
+    CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+{% endif %}

@@ -1,0 +1,16 @@
+---
+# Define OS-specific variables
+apache_package_name: "{{ 'apache2' if ansible_os_family == 'Debian' else 'httpd' }}"
+apache_service_name: "{{ 'apache2' if ansible_os_family == 'Debian' else 'httpd' }}"
+apache_listen_config_file: "{{ '/etc/apache2/ports.conf' if ansible_os_family == 'Debian' else '/etc/httpd/conf/httpd.conf' }}"
+apache_config_path: "{{ '/etc/apache2/sites-available/000-default.conf' if ansible_os_family == 'Debian' else '/etc/httpd/conf.d/vhost.conf' }}"
+apache_vhost_dest_path: "{{ '/etc/apache2/sites-enabled/000-default.conf' if ansible_os_family == 'Debian' else apache_config_path }}" # Symlink target for Debian/Ubuntu
+apache_user: "{{ 'www-data' if ansible_os_family == 'Debian' else 'apache' }}"
+apache_group: "{{ 'www-data' if ansible_os_family == 'Debian' else 'apache' }}"
+
+# Your application specific variables
+web_root_dir: /srv/www/mywebapp
+web_app_owner: "{{ apache_user }}" # Often www-data or apache
+web_app_group: "{{ apache_group }}"
+
+apache_listen_port: 3030

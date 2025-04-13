@@ -1,0 +1,49 @@
+---
+# Play 1: Check connectivity (Optional, but good practice)
+- name: Verify Connection to Target Hosts
+  hosts: webservers
+  gather_facts: no
+
+  tasks:
+    - name: Ping all hosts in the 'webservers' group
+      ansible.builtin.ping:
+
+# Play 2: Configure the Apache application using the role
+- name: Configure Web Servers (Apache Role)
+  hosts: webservers
+  become: yes
+  roles:
+    - apache # This role now uses apache_listen_port from group_vars
+
+# -------------------------------------------------------------
+# Play 3: Configure the Firewall (ADD THIS ENTIRE SECTION)
+# -------------------------------------------------------------
+- name: Configure Firewall for Web Server Access
+  hosts: webservers
+  become: yes # Firewall changes require root privileges
+  # Optional: Gather facts if you haven't already in a previous play
+  # gather_facts: yes
+
+  # Make sure Ansible collections are installed:
+  # ansible-galaxy collection install community.general ansible.posix
+  tasks:
+    - name: Allow incoming traffic on Apache port (UFW - Debian/Ubuntu)
+      community.general.ufw:
+        rule: allow
+        port: "{{ apache_listen_port }}" # Use the variable from group_vars
+        proto: tcp
+        comment: Allow Apache access # Optional comment for the rule
+      when: ansible_os_family == 'Debian' # Only run on Debian/Ubuntu
+
+    - name: Allow incoming traffic on Apache port (firewalld - RHEL/CentOS)
+      ansible.posix.firewalld:
+        port: "{{ apache_listen_port }}/tcp" # Use the variable from group_vars
+        permanent: yes # Make the rule persistent across reboots
+        state: enabled # Ensure the rule is active
+        immediate: yes # Apply the rule now without needing a firewall reload task
+      when: ansible_os_family == 'RedHat' # Only run on RHEL/CentOS/Fedora
+# -------------------------------------------------------------
+# End of added Firewall Play Section
+# -------------------------------------------------------------
+
+# You could add more plays here for other configurations...

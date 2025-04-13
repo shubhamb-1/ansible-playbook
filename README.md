@@ -38,7 +38,27 @@ This Ansible project automates the deployment and basic configuration of the Apa
 
 ## Project Structure
 
-ansible-project/├── inventories/│   └── production/│       ├── group_vars/│       │   └── webservers.yml       # Define variables (e.g., apache_listen_port)│       └── hosts.ini               # Define hosts and connection details├── roles/│   └── apache/                     # Apache configuration role│       ├── tasks/│       │   └── main.yml            # Main tasks for Apache setup│       ├── handlers/│       │   └── main.yml            # Handlers (e.g., restart apache)│       ├── templates/│       │   └── apache-vhost.conf.j2 # Template for the vhost config│       ├── files/│       │   └── index.html          # Sample web page file│       └── vars/│           └── main.yml            # Role vars (package names, paths)├── site.yml                        # Main playbook orchestrating roles & firewall└── README.md                       # This file
+```text
+ansible-project/
+├── inventories/
+│   └── production/
+│       ├── group_vars/
+│       │   └── webservers.yml       # Define variables (e.g., apache_listen_port)
+│       └── hosts.ini               # Define hosts and connection details
+├── roles/
+│   └── apache/                     # Apache configuration role
+│       ├── tasks/
+│       │   └── main.yml            # Main tasks for Apache setup
+│       ├── handlers/
+│       │   └── main.yml            # Handlers (e.g., restart apache)
+│       ├── templates/
+│       │   └── apache-vhost.conf.j2 # Template for the vhost config
+│       ├── files/
+│       │   └── index.html          # Sample web page file
+│       └── vars/
+│           └── main.yml            # Role vars (package names, paths)
+├── site.yml                        # Main playbook orchestrating roles & firewall
+└── README.md                       # This file
 ## Configuration
 
 1.  **Inventory (`inventories/production/hosts.ini`):**

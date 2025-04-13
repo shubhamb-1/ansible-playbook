@@ -59,6 +59,8 @@ ansible-project/
 │           └── main.yml            # Role vars (package names, paths)
 ├── site.yml                        # Main playbook orchestrating roles & firewall
 └── README.md                       # This file
+```
+
 ## Configuration
 
 1.  **Inventory (`inventories/production/hosts.ini`):**
